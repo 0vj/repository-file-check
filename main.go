@@ -38,7 +38,7 @@ func validate_repository(c *gin.Context) {
 			})
 		}
 	}
-	if fileExists("tmp/YourFile") == true {
+	if fileExists("tmp/YourFile" + os.Getenv("FILE_VALIDATE")) == true {
 		c.JSON(200, gin.H{
 			"status": true,
 			"Repository approved"
