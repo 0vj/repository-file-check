@@ -13,12 +13,35 @@ func main() {
 	r.POST("/api/v1/validate_repository", validate_repository)
 	r.Run()
 }
-func validate_repository(c *gin.Context) {
-	repository := c.PostForm("repository")
-	username := c.PostForm("username")
-	password := c.PostForm("password")
+
+func ValidateRepositoryEndpoint(c *gin.Context):
+        repository := c.PostForm("repository")
+        username := c.PostForm("username")
+        password := c.PostForm("password")
+	validate_status, have_err := ValidateRepository(repository, username, password)
+	if have_err true {
+                c.JSON(200, gin.H{
+                        "status":  false,
+                        "messege": "There was a problem checking the repository",
+                })
+	} else {
+		if validate_staus {
+                        c.JSON(200, gin.H{
+                                "status": true,
+                                "Repository approved"
+                        })
+		} else {
+                        c.JSON(200, gin.H{
+                                "status":  false,
+                                "messege": "Repository not approved",
+                        })
+                }
+	}
+
+
+func ValidateRepository(repository, username, password string) (bool, bool){
 	if username != "" && password == "" {
-		git.PlainClone("./tmp", false, &git.CloneOptions{
+		_, err = git.PlainClone("./tmp", false, &git.CloneOptions{
 			URL:      repository,
 			Progress: os.Stdout,
 		})
@@ -32,22 +55,13 @@ func validate_repository(c *gin.Context) {
 			},
 		})
 		if err != nil {
-			c.JSON(200, gin.H{
-				"status":  false,
-				"messege": "There was a problem checking the repository",
-			})
+			return false, true
 		}
 	}
-	if fileExists("tmp/YourFile" + os.Getenv("FILE_VALIDATE")) == true {
-		c.JSON(200, gin.H{
-			"status": true,
-			"Repository approved"
-		})
+	if fileExists("tmp/" + os.Getenv("FILE_VALIDATE")) == true {
+		return true, false
 	} else {
-		c.JSON(200, gin.H{
-			"status":  false,
-			"messege": "Repository not approved",
-		})
+		return false, false
 	}
 	os.RemoveAll("tmp")
 
